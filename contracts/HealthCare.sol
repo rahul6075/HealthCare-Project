@@ -1,48 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.25 <0.9.0;
 
-contract HealthCare1 {
+contract HealthCare {
     address private owner;
-    mapping(address => doctor) private doctors; // doctor and list of patient profile he can access
-    mapping(address => patient) private patients;
-    mapping(bytes32 => filesInfo) private hashToFile; //filehash to file info
-    mapping(address => mapping(address => uint256)) private doctorToPatient;
-    mapping(address => mapping(address => uint256)) private patientToDoctor;
-    mapping(address => mapping(bytes32 => uint256)) private patientToFile;
-    uint256 private gpos;
 
-    struct filesInfo {
-        string file_name;
-        string file_type;
-        string file_secret;
-    }
-
-    struct patient {
+    struct Patient {
         string name;
         uint8 age;
         address id;
-        bytes32[] files; // hashes of file that belong to this user for display purpose
         address[] doctor_list;
     }
 
-    struct doctor {
+    struct Doctor {
         string name;
         address id;
         address[] patient_list;
     }
 
-    constructor() public {
+    mapping(address => Doctor) private doctors;
+    mapping(address => Patient) private patients;
+    mapping(address => mapping(address => uint256)) private doctorToPatient; // doctors to patient list
+    mapping(address => mapping(address => uint256)) private patientToDoctor;
+
+    constructor() {
         owner = msg.sender;
     }
 
     modifier checkDoctor(address id) {
-        doctor memory d = doctors[id];
+        Doctor memory d = doctors[id];
         require(d.id > address(0x0)); //check if doctor exist
         _;
     }
 
     modifier checkPatient(address id) {
-        patient memory p = patients[id];
+        Patient memory p = patients[id];
         require(p.id > address(0x0)); //check if patient exist
         _;
     }
@@ -73,43 +64,41 @@ contract HealthCare1 {
     //   }
 
     function signupPatient(string memory _name, uint8 _age) public {
-        patient memory p = patients[msg.sender];
+        Patient memory p = patients[msg.sender];
         require(keccak256(abi.encodePacked(_name)) != keccak256(""));
         require((_age > 0) && (_age < 100));
         require(!(p.id > address(0x0)));
 
-        patients[msg.sender] = patient({
+        patients[msg.sender] = Patient({
             name: _name,
             age: _age,
             id: msg.sender,
-            files: new bytes32[](0),
             doctor_list: new address[](0)
         });
     }
 
     function signupDoctor(string memory _name) public {
-        doctor memory d = doctors[msg.sender];
+        Doctor memory d = doctors[msg.sender];
         require(keccak256(abi.encodePacked(_name)) != keccak256(""));
         require(!(d.id > address(0x0)));
 
-        doctors[msg.sender] = doctor({
+        doctors[msg.sender] = Doctor({
             name: _name,
             id: msg.sender,
             patient_list: new address[](0)
         });
     }
 
-    function grantAccessToDoctor(address doctor_id)
-        public
-        checkPatient(msg.sender)
-        checkDoctor(doctor_id)
-    {
-        patient storage p = patients[msg.sender];
-        doctor storage d = doctors[doctor_id];
+    function grantAccessToDoctor(
+        address doctor_id
+    ) public checkPatient(msg.sender) checkDoctor(doctor_id) {
+        Patient storage p = patients[msg.sender];
+        Doctor storage d = doctors[doctor_id];
         require(patientToDoctor[msg.sender][doctor_id] < 1); // this means doctor already been access
 
-        uint256 pos = p.doctor_list.push(doctor_id); // new length of array
-        gpos = pos;
+        p.doctor_list.push(doctor_id); // new length of array
+        // gpos = pos;
+        uint pos = p.doctor_list.length;
         patientToDoctor[msg.sender][doctor_id] = pos;
         d.patient_list.push(msg.sender);
     }
@@ -124,28 +113,23 @@ contract HealthCare1 {
     //       patientToFile[msg.sender][_fileHash] = pos;
     //   }
 
-    function getPatientInfo()
+    function getPatientProfile()
         public
         view
         checkPatient(msg.sender)
-        returns (
-            string memory,
-            uint8,
-            bytes32[] memory,
-            address[] memory
-        )
+        returns (string memory, uint8, address[] memory)
     {
-        patient memory p = patients[msg.sender];
-        return (p.name, p.age, p.files, p.doctor_list);
+        Patient memory p = patients[msg.sender];
+        return (p.name, p.age, p.doctor_list);
     }
 
-    function getDoctorInfo()
+    function getDoctorProfile()
         public
         view
         checkDoctor(msg.sender)
         returns (string memory, address[] memory)
     {
-        doctor memory d = doctors[msg.sender];
+        Doctor memory d = doctors[msg.sender];
         return (d.name, d.patient_list);
     }
 
@@ -161,23 +145,20 @@ contract HealthCare1 {
     //           return ('', '');
     //   }
 
-    function getPatientInfoForDoctor(address pat)
+    function getPatientInfoForDoctor(
+        address pat
+    )
         public
         view
         checkPatient(pat)
         checkDoctor(msg.sender)
-        returns (
-            string memory,
-            uint8,
-            address,
-            bytes32[] memory
-        )
+        returns (string memory, uint8, address)
     {
-        patient memory p = patients[pat];
+        Patient memory p = patients[pat];
 
         require(patientToDoctor[pat][msg.sender] > 0);
 
-        return (p.name, p.age, p.id, p.files);
+        return (p.name, p.age, p.id);
     }
 
     //   function getFileInfo(bytes32 fileHashId) private view checkFile(fileHashId) returns(filesInfo memory) {
