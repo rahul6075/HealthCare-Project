@@ -27,169 +27,44 @@ import Page_404 from "./pages/Page_404";
 import PaitentSignup from "./components/landingPage/PaitentSignup";
 
 function App() {
-  return (
-    <div className="bg-bgprimary flex">
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <LandingPage
-            />
-          }
-        />
-        <Route path="about" element={<About />} />
-        <Route
-          path="contact"
-          element={
-            <Contact
-            />
-          }
-        />
-        <Route
-          path="Register"
-          element={
-            <RegisterPatient />
-          }
-        />
-        <Route
-          path="patient"
-          element={
-            <PatientProfileSideBar
-            />
-          }
-        >
-          <Route
-            path="dashboard"
-            element={
-              <PatientDashboard />
-            }
-          />
-          <Route
-            path="reports"
-            element={
-              <PatientReports />
-            }
-          />
-          <Route
-            path="history"
-            element={
-              <PatientHistory
-              />
-            }
-          />
-          <Route
-            path="profile"
-            element={
-              <PatientProfile
-              />
-            }
-          />
-          <Route
-            path="prescription"
-            element={
-              <PreviewPrescription
-              />
-            }
-          />
-        </Route>
+	return (
+		<div className="bg-bgprimary flex">
+			<Routes>
+				<Route path="/" element={<LandingPage />} />
+				<Route path="about" element={<About />} />
+				<Route path="contact" element={<Contact />} />
+				<Route path="Register" element={<RegisterPatient />} />
+				<Route path="patient" element={<PatientProfileSideBar />}>
+					<Route path="dashboard" element={<PatientDashboard />} />
+					<Route path="reports" element={<PatientReports />} />
+					<Route path="history" element={<PatientHistory />} />
+					<Route path="profile" element={<PatientProfile />} />
+					<Route path="prescription" element={<PreviewPrescription />} />
+				</Route>
 
-        <Route
-          path="doctor"
-          element={
-            <DoctorDashboardSidebar
-            />
-          }
-        >
-          <Route
-            path="dashboard"
-            element={
-              <DoctorDashboard
-              />
-            }
-          />
-          <Route
-            path="reports"
-            element={
-              <PatientReportsDoctorView
-              />
-            }
-          />
-          
-          <Route
-            path="history"
-            element={
-              <PatientHistoryDoctorView
+				<Route path="doctor" element={<DoctorDashboardSidebar />}>
+					<Route path="dashboard" element={<DoctorDashboard />} />
+					<Route path="reports" element={<PatientReportsDoctorView />} />
 
-              />
-            }
-          />
-          <Route
-            path="profile"
-            element={
-              <DoctorProfile
+					<Route path="history" element={<PatientHistoryDoctorView />} />
+					<Route path="profile" element={<DoctorProfile />} />
+					<Route path="addDiagno" element={<AddNewDiagnosis />} />
+					<Route
+						path="prescription"
+						element={<PreviewPrescriptionDoctorView />}
+					/>
+				</Route>
 
-              />
-            }
-          />
-          <Route
-            path="addDiagno"
-            element={
-              <AddNewDiagnosis
-
-              />
-            }
-          />
-          <Route
-            path="prescription"
-            element={
-              <PreviewPrescriptionDoctorView
-              />
-            }
-          />
-        </Route>
-
-        <Route
-          path="admin"
-          element={
-            <AdminSidebar
-            />
-          }
-        >
-          <Route
-            path="dashboard"
-            element={
-              <AdminDashboard
-              />
-            }
-          />
-          <Route
-            path="doctorslist"
-            element={
-              <DoctorList
-              />
-            }
-          />
-          <Route
-            path="patientslist"
-            element={
-              <PatientList
-
-              />
-            }
-          />
-          <Route
-            path="registerdoctor"
-            element={
-              <RegisterDoctor
-
-              />
-            }
-          />
-        </Route>
-        <Route path="*" element={<Page_404 />} />
-      </Routes>
-    </div>
-  );
+				<Route path="admin" element={<AdminSidebar />}>
+					<Route path="dashboard" element={<AdminDashboard />} />
+					<Route path="doctorslist" element={<DoctorList />} />
+					<Route path="patientslist" element={<PatientList />} />
+					<Route path="registerdoctor" element={<RegisterDoctor />} />
+				</Route>
+				<Route path="*" element={<Page_404 />} />
+			</Routes>
+		</div>
+	);
 }
 
 export default App;
