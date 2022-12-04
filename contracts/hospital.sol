@@ -1,166 +1,206 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.25 <0.9.0;
-contract Hospital {
-    
+
+contract HealthCare1 {
+    address private owner;
+    mapping(address => doctor) private doctors; // doctor and list of patient profile he can access
+    mapping(address => patient) private patients;
+    mapping(bytes32 => filesInfo) private hashToFile; //filehash to file info
+    mapping(address => mapping(address => uint256)) private doctorToPatient;
+    mapping(address => mapping(address => uint256)) private patientToDoctor;
+    mapping(address => mapping(bytes32 => uint256)) private patientToFile;
+    uint256 private gpos;
+
+    struct filesInfo {
+        string file_name;
+        string file_type;
+        string file_secret;
+    }
+
     struct patient {
         string name;
-        uint age;
-        address[] doctorAccessList;
-        uint[] diagnosis;
-        string record;
+        uint8 age;
+        address id;
+        bytes32[] files; // hashes of file that belong to this user for display purpose
+        address[] doctor_list;
     }
-    
+
     struct doctor {
         string name;
-        uint age;
-        address[] patientAccessList;
+        address id;
+        address[] patient_list;
     }
 
-    uint creditPool;
-
-    address[] public patientList;
-    address[] public doctorList;
-
-    mapping (address => patient) patientInfo;
-    mapping (address => doctor) doctorInfo;
-    mapping (address => address) Empty;
-    // might not be necessary
-    mapping (address => string) patientRecords;
-    
-
-
-    function add_agent(string memory _name, uint _age, uint _designation, string memory _hash) public returns(string memory){
-        address addr = msg.sender;
-        
-        if(_designation == 0){
-            patient memory p;
-            p.name = _name;
-            p.age = _age;
-            p.record = _hash;
-            patientInfo[msg.sender] = p;
-            patientList.push(addr);
-            return _name;
-        }
-       else if (_designation == 1){
-            doctorInfo[addr].name = _name;
-            doctorInfo[addr].age = _age;
-            doctorList.push(addr);
-            return _name;
-       }
-       else{
-           revert();
-       }
+    constructor() public {
+        owner = msg.sender;
     }
 
-
-    function get_patient(address addr) view public returns (string memory , uint, uint[] memory , address, string memory ){
-        // if(keccak256(patientInfo[addr].name) == keccak256(""))revert();
-        return (patientInfo[addr].name, patientInfo[addr].age, patientInfo[addr].diagnosis, Empty[addr], patientInfo[addr].record);
+    modifier checkDoctor(address id) {
+        doctor memory d = doctors[id];
+        require(d.id > address(0x0)); //check if doctor exist
+        _;
     }
 
-    function get_doctor(address addr) view public returns (string memory , uint){
-        // if(keccak256(doctorInfo[addr].name)==keccak256(""))revert();
-        return (doctorInfo[addr].name, doctorInfo[addr].age);
-    }
-    function get_patient_doctor_name(address paddr, address daddr) view public returns (string memory , string memory ){
-        return (patientInfo[paddr].name,doctorInfo[daddr].name);
+    modifier checkPatient(address id) {
+        patient memory p = patients[id];
+        require(p.id > address(0x0)); //check if patient exist
+        _;
     }
 
-    function permit_access(address addr) payable public {
-        require(msg.value == 2 ether);
-
-        creditPool += 2;
-        
-        doctorInfo[addr].patientAccessList.push(msg.sender);
-        patientInfo[msg.sender].doctorAccessList.push(addr);
-        
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
     }
 
+    //   modifier checkFileAccess(string memory role, address id, bytes32 fileHashId, address pat) {
+    //     uint pos;
+    //     if(keccak256(abi.encodePacked(role)) == keccak256("doctor")) {
+    //         require(patientToDoctor[pat][id] > 0);
+    //         pos = patientToFile[pat][fileHashId];
+    //         require(pos > 0);
+    //     }
+    //     else if(keccak256(abi.encodePacked(role)) == keccak256("patient")) {
+    //         pos = patientToFile[id][fileHashId];
+    //         require(pos > 0);
+    //     }
+    //     _;
+    //   }
 
-    //must be called by doctor
-    function insurance_claim(address paddr, uint _diagnosis, string memory  _hash) payable public  {
-        bool patientFound = false;
-        for(uint i = 0;i<doctorInfo[msg.sender].patientAccessList.length;i++){
-            if(doctorInfo[msg.sender].patientAccessList[i]==paddr){
-                payable(msg.sender).transfer(2 ether);
-                creditPool -= 2;
-                patientFound = true;
-                
-            }
-            
-        }
-        if(patientFound==true){
-            set_hash(paddr, _hash);
-            remove_patient(paddr, msg.sender);
-        }else {
-            revert();
-        }
+    //   modifier checkFile(bytes32 fileHashId) {
+    //     bytes memory tempString = bytes(hashToFile[fileHashId].file_name);
+    //     require(tempString.length > 0);//check if file exist
+    //     _;
+    //   }
 
-        bool DiagnosisFound = false;
-        for(uint j = 0; j < patientInfo[paddr].diagnosis.length;j++){
-            if(patientInfo[paddr].diagnosis[j] == _diagnosis)DiagnosisFound = true;
-        }
+    function signupPatient(string memory _name, uint8 _age) public {
+        patient memory p = patients[msg.sender];
+        require(keccak256(abi.encodePacked(_name)) != keccak256(""));
+        require((_age > 0) && (_age < 100));
+        require(!(p.id > address(0x0)));
+
+        patients[msg.sender] = patient({
+            name: _name,
+            age: _age,
+            id: msg.sender,
+            files: new bytes32[](0),
+            doctor_list: new address[](0)
+        });
     }
 
-    function remove_element_in_array(address[] storage Array, address addr) internal
+    function signupDoctor(string memory _name) public {
+        doctor memory d = doctors[msg.sender];
+        require(keccak256(abi.encodePacked(_name)) != keccak256(""));
+        require(!(d.id > address(0x0)));
+
+        doctors[msg.sender] = doctor({
+            name: _name,
+            id: msg.sender,
+            patient_list: new address[](0)
+        });
+    }
+
+    function grantAccessToDoctor(address doctor_id)
+        public
+        checkPatient(msg.sender)
+        checkDoctor(doctor_id)
     {
-        bool check = false;
-        uint del_index = 0;
-        for(uint i = 0; i<Array.length; i++){
-            if(Array[i] == addr){
-                check = true;
-                del_index = i;
-            }
-        }
-        if(!check) revert();
-        else{
-            if(Array.length == 1){
-                delete Array[del_index];
-            }
-            else {
-                Array[del_index] = Array[Array.length - 1];
-                delete Array[Array.length - 1];
+        patient storage p = patients[msg.sender];
+        doctor storage d = doctors[doctor_id];
+        require(patientToDoctor[msg.sender][doctor_id] < 1); // this means doctor already been access
 
-            }
-        }
+        uint256 pos = p.doctor_list.push(doctor_id); // new length of array
+        gpos = pos;
+        patientToDoctor[msg.sender][doctor_id] = pos;
+        d.patient_list.push(msg.sender);
     }
 
-    function remove_patient(address paddr, address daddr) public {
-        remove_element_in_array(doctorInfo[daddr].patientAccessList, paddr);
-        remove_element_in_array(patientInfo[paddr].doctorAccessList, daddr);
-    }
-    
-    function get_accessed_doctorlist_for_patient(address addr) public view returns (address[] memory )
-    { 
-        address[] storage doctoraddr = patientInfo[addr].doctorAccessList;
-        return doctoraddr;
-    }
-    function get_accessed_patientlist_for_doctor(address addr) public view returns (address[] memory )
+    //   function addFile(string memory _file_name, string memory _file_type, bytes32 _fileHash, string memory _file_secret) public checkPatient(msg.sender) {
+    //       patient storage p = patients[msg.sender];
+
+    //       require(patientToFile[msg.sender][_fileHash] < 1);
+
+    //       hashToFile[_fileHash] = filesInfo({file_name:_file_name, file_type:_file_type,file_secret:_file_secret});
+    //       uint pos = p.files.push(_fileHash);
+    //       patientToFile[msg.sender][_fileHash] = pos;
+    //   }
+
+    function getPatientInfo()
+        public
+        view
+        checkPatient(msg.sender)
+        returns (
+            string memory,
+            uint8,
+            bytes32[] memory,
+            address[] memory
+        )
     {
-        return doctorInfo[addr].patientAccessList;
+        patient memory p = patients[msg.sender];
+        return (p.name, p.age, p.files, p.doctor_list);
     }
 
-    
-    function revoke_access(address daddr) public payable{
-        remove_patient(msg.sender,daddr);
-        payable(msg.sender).transfer(2 ether);
-        creditPool -= 2;
+    function getDoctorInfo()
+        public
+        view
+        checkDoctor(msg.sender)
+        returns (string memory, address[] memory)
+    {
+        doctor memory d = doctors[msg.sender];
+        return (d.name, d.patient_list);
     }
 
-    function get_patient_list() public view returns(address[] memory ){
-        return patientList;
+    //   function checkProfile(address _user) public view onlyOwner returns(string memory, string memory){
+    //       patient memory p = patients[_user];
+    //       doctor memory d = doctors[_user];
+
+    //       if(p.id > address(0x0))
+    //           return (p.name, 'patient');
+    //       else if(d.id > address(0x0))
+    //           return (d.name, 'doctor');
+    //       else
+    //           return ('', '');
+    //   }
+
+    function getPatientInfoForDoctor(address pat)
+        public
+        view
+        checkPatient(pat)
+        checkDoctor(msg.sender)
+        returns (
+            string memory,
+            uint8,
+            address,
+            bytes32[] memory
+        )
+    {
+        patient memory p = patients[pat];
+
+        require(patientToDoctor[pat][msg.sender] > 0);
+
+        return (p.name, p.age, p.id, p.files);
     }
 
-    function get_doctor_list() public view returns(address[] memory ){
-        return doctorList;
-    }
+    //   function getFileInfo(bytes32 fileHashId) private view checkFile(fileHashId) returns(filesInfo memory) {
+    //       return hashToFile[fileHashId];
+    //   }
 
-    function get_hash(address paddr) public view returns(string memory ){
-        return patientInfo[paddr].record;
-    }
+    //   function getFileSecret(bytes32 fileHashId, string memory role, address id, address pat) public view
+    //   checkFile(fileHashId) checkFileAccess(role, id, fileHashId, pat)
+    //   returns(string memory) {
+    //       filesInfo memory f = getFileInfo(fileHashId);
+    //       return (f.file_secret);
+    //   }
 
-    function set_hash(address paddr, string memory _hash) internal {
-        patientInfo[paddr].record = _hash;
-    }
+    //   function getFileInfoDoctor(address doc, address pat, bytes32 fileHashId) public view
+    //   onlyOwner checkPatient(pat) checkDoctor(doc) checkFileAccess("doctor", doc, fileHashId, pat)
+    //   returns(string memory, string memory) {
+    //       filesInfo memory f = getFileInfo(fileHashId);
+    //       return (f.file_name, f.file_type);
+    //   }
 
+    //   function getFileInfoPatient(address pat, bytes32 fileHashId) public view
+    //   onlyOwner checkPatient(pat) checkFileAccess("patient", pat, fileHashId, pat) returns(string memory, string memory) {
+    //       filesInfo memory f = getFileInfo(fileHashId);
+    //       return (f.file_name, f.file_type);
+    //   }
 }
