@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import profile from "../../assets/img/landingPage/profile.png";
-import ReactLoading from "react-loading";
+
+
 export default function Login(props) {
 	const navigate = useNavigate();
 	const [Loading, setLoading] = useState(false);
