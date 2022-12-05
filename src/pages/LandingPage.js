@@ -28,12 +28,10 @@ export default function LandingPage(props) {
       setError('Please install metamask');
     }
   };
-
-  const { account } = wallet;
+  
   useEffect(() => {
     conenctWalletHandler();
   }, []);
-  console.log(account);
 
   return (
     <div className='h-screen max-h-min flex flex-col'>
