@@ -25,12 +25,13 @@ export default function Register(props) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const TaskContract = new ethers.Contract(
-          contract.networks[5777],
+          contract.networks[5777].address,
           contract.abi,
           signer
         )
-         const {name, age} = 
-         await TaskContract.signupPatient(name, Number(patient.age));
+         const {name, age} = patient;
+         let ageNum = Number(age);
+         await TaskContract.signupPatient(name, ageNum);
          console.log( 'Signup ')     
       } else {
         console.log("Ethereum object doesn't exist");
