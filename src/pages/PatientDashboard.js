@@ -7,9 +7,12 @@ import Footer from "../components/landingPage/Footer";
 import eye from "../assets/img/dashboard/eye.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Navbar from "../components/landingPage/Navbar";
+import data from "../data.json"
 
-const PatientDashboard = (props) => {
+const PatientDashboard = ({user}) => {
   return (
+    <>
     <div className="full-body col-span-10 h-screen">
       <div className="body-without-footer max-h-min bg-bgprimary ">
         <div className=" main ">
@@ -17,7 +20,7 @@ const PatientDashboard = (props) => {
             <div className="flex  h-12 m-2 bg-bgprimary rounded mt-4  ">
               <div>
                 <h1 className="text-2xl font-poppins font-bold p-2 ">
-                  DashBoard Today
+                   Paitent DashBoard
                 </h1>
               </div>
 
@@ -34,12 +37,12 @@ const PatientDashboard = (props) => {
               <Link to="/patient/profile">
                 <button className="flex bg-white rounded shadow  px-4  ml-60 h-14 ">
                   <img
-                    src=""
+                    src={patient_profile}
                     className="h-14 p-1 rounded-2xl"
                     alt="profile"
                   ></img>
                   <div className="mt-4 ml-4  font-bold font-poppins">
-                    <h1>Parvesh Barak</h1>
+                    <h1>{user[1]}</h1>
                   </div>
                 </button>
               </Link>
@@ -59,8 +62,17 @@ const PatientDashboard = (props) => {
                     <h1>Name : </h1>
                   </div>
                   <div className="flex ml-2   ">
-                    <h1 className="pl-1">Parvesh</h1>
-                    <h1 className="pl-1">Badak</h1>
+                    <h1 className="pl-1">{user[1]}</h1>
+                   
+                  </div>
+                </div>
+                <div className="flex">
+                  <div>
+                    <h1>Email : </h1>
+                  </div>
+                  <div className="flex ml-2   ">
+                    <h1 className="pl-1">{user[2]}</h1>
+                   
                   </div>
                 </div>
                 <div className="flex">
@@ -78,10 +90,6 @@ const PatientDashboard = (props) => {
                   <div className="ml-2">
                     <h1>B+</h1>
                   </div>
-                </div>
-                <div>
-                  <h1 className="font-bold mt-4">Past Health History</h1>
-                  <div>2021 to 2022</div>
                 </div>
               </div>
             </div>
@@ -170,6 +178,11 @@ const PatientDashboard = (props) => {
                   <hr></hr>
                   <hr></hr>
                 </div>
+                   {
+                    //  data?.patient-record.map((item) => {
+                        
+                    //  })
+                   }
                   <div className="mx-auto mt-3 mb-5">No Records Found...</div>
               </div>
             </div>
@@ -180,6 +193,7 @@ const PatientDashboard = (props) => {
         <Footer></Footer>
       </div>
     </div>
+    </>
   );
 };
 

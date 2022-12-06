@@ -1,3 +1,4 @@
+import React, {useEffect, useState} from "react";
 import './App.css';
 import Contact from './components/landingPage/Contact';
 import RegisterPatient from './components/landingPage/RegisterPatient';
@@ -27,15 +28,25 @@ import Page_404 from './pages/Page_404';
 import PaitentSignup from './components/landingPage/PaitentSignup';
 
 function App() {
+  const data =  JSON.parse(localStorage.getItem('userInfo'));
+  const [user, setUser] = useState(data);
+
+  useEffect(() => {
+    const items = JSON.parse(localStorage.getItem('userInfo'));
+    if (items) {
+      console.log('items', items);
+     setUser(items);
+    }
+  },[]);
   return (
     <div className='bg-bgprimary flex'>
       <Routes>
-        <Route path='/' element={<LandingPage />} />
+        <Route path='/' element={<LandingPage user = {user} />} />
         <Route path='about' element={<About />} />
         <Route path='contact' element={<Contact />} />
         <Route path='Register' element={<RegisterPatient />} />
         <Route path='patient' element={<PatientProfileSideBar />}>
-          <Route path='dashboard' element={<PatientDashboard />} />
+          <Route path='dashboard' element={<PatientDashboard user ={user} />} />
           <Route path='reports' element={<PatientReports />} />
           <Route path='history' element={<PatientHistory />} />
           <Route path='profile' element={<PatientProfile />} />

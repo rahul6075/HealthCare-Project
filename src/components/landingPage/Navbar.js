@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../../assets/img/landingPage/logo.png";
-
 import { Link, useLocation } from "react-router-dom";
+
 
 export default function Navbar() {
   const location = useLocation();
+  const data =  JSON.parse(localStorage.getItem('userInfo'));
+  const [user, setUser]= useState(data); 
+  
   return (
     <nav className="lg:bg-white lg:w-screen lg:h-14 shadow-sm lg:px-16 lg:py-3 flex justify-items-center items-center  w-full ">
       <img
@@ -27,13 +30,31 @@ export default function Navbar() {
         </li>
       </ul>
 
-      <button className="bg-primary lg:py-2 lg:px-3 rounded font-semibold font-poppins shadow-sm hover:bg-bgsecondary py-1 px-2 mr-2">
-        {location.pathname === "/register" ? (
-          <Link to="/">Login</Link>
-        ) : (
-          <Link to="/register">Register</Link>
-        )}
-      </button>
+      {user ? (
+      
+        <button type="button" className="w-10 h-10 rounded-full border-2 border-black flex justify-center items-center">
+          <p>{user[1][0]}</p>
+        </button>
+     
+      ) : (
+        <button className="bg-primary lg:py-2 lg:px-3 rounded font-semibold font-poppins shadow-sm hover:bg-bgsecondary py-1 px-2 mr-2">
+          {location.pathname === "/register" ? (
+            <Link to="/">Login</Link>
+          ) : (
+            <Link to="/register">Register</Link>
+          )}
+        </button>
+      )
+
+      }
+      {/* <button className="bg-primary lg:py-2 lg:px-3 rounded font-semibold font-poppins shadow-sm hover:bg-bgsecondary py-1 px-2 mr-2">
+            {location.pathname === "/register" ? (
+              <Link to="/">Login</Link>
+            ) : (
+              <Link to="/register">Register</Link>
+            )}
+          </button> */}
+
     </nav>
   );
 }

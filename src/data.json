@@ -1,0 +1,38 @@
+{
+    "record": [
+        {
+            "id":1,
+            "date":"10/10/2021",
+            "docter_name": "Mr. Rakesh Jhaa",
+            "daignosis": "Fever",
+            "presc": "Lorem ispusm some thinf"
+        },
+        {
+            "id":2,
+            "date":"10/10/2021",
+            "docter_name": "Mr. Rakesh Jhaa",
+            "daignosis": "Fever",
+            "presc": "Lorem ispusm some thinf"
+        },
+        {
+            "id":3,
+            "date":"10/10/2021",
+            "docter_name": "Mr. Rakesh Jhaa",
+            "daignosis": "Fever",
+            "presc": "Lorem ispusm some thinf"
+        },
+        {
+            "id":4,
+            "date":"10/10/2021",
+            "docter_name": "Mr. Rakesh Jhaa",
+            "daignosis": "Fever",
+            "presc": "Lorem ispusm some thinf"
+        },
+        {
+            "date":"10/10/2021",
+            "docter_name": "Mr. Rakesh Jhaa",
+            "daignosis": "Fever",
+            "presc": "Lorem ispusm some thinf"
+        }
+    ]
+}

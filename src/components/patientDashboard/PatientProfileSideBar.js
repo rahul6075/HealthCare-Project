@@ -7,16 +7,11 @@ import logoutimg from "../../assets/img/dashboard/logout.png";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const PatientProfileSideBar = (props) => {
+const PatientProfileSideBar = () => {
   const navigate = useNavigate();
   const logout = async () => {
-    const res = await fetch("/logout");
-    props.settoastCondition({
-      status: "success",
-      message: "Logged out Successfully!!!",
-    });
-    props.setToastShow(true);
-    navigate("/");
+     localStorage.removeItem("userInfo");
+     navigate("/");
   };
   const [Toggle, setToggle] = useState("Dashboard");
 
