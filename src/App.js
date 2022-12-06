@@ -54,7 +54,7 @@ function App() {
         </Route>
 
         <Route path='doctor' element={<DoctorDashboardSidebar />}>
-          <Route path='dashboard' element={<DoctorDashboard />} />
+          <Route path='dashboard' element={<DoctorDashboard user = {user} />} />
           <Route path='reports' element={<PatientReportsDoctorView />} />
 
           <Route path='history' element={<PatientHistoryDoctorView />} />

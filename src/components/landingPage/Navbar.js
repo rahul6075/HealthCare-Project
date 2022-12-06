@@ -30,7 +30,7 @@ export default function Navbar() {
         </li>
       </ul>
 
-      {user ? (
+      {user?.name ? (
       
         <button type="button" className="w-10 h-10 rounded-full border-2 border-black flex justify-center items-center">
           <p>{user[1][0]}</p>

@@ -9,6 +9,7 @@ const addressContract = '0xE6773e3D8C979B4CaCAd2510759655Be5b076630'
 export default function Login(props) {
 	const navigate = useNavigate();
 	const [Toggle, setToggle] = useState(null);
+	const [role, setRole] = useState(null);
 	const [currentAccount, setCurrentAccount] = useState(null);
 	const conenctWalletHandler = async () => {
 		try {
@@ -45,14 +46,16 @@ export default function Login(props) {
 					signer
 				)
 				const userInfo = await TaskContract.Login();
+				setRole(userInfo.role);
+				console.log('userInfo', userInfo.role);
 				if (userInfo) {
 					localStorage.setItem("userInfo", JSON.stringify(userInfo));
-					switch (Toggle) {
+					switch (role) {
 						case "Patient":
 							navigate("/patient/dashboard");
 							break;
 						case "Doctor":
-							navigate("/patient/dashboard");
+							navigate("/doctor/dashboard");
 							break;
 						case "Admin":
 							navigate("/admin/dashboard");

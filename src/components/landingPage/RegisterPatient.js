@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { ethers } from "ethers";
 import contract from "../../abis/HealthCare.json"
 
 export default function Register(props) {
+  const navigate = useNavigate();
   const [toggle, setToggle] = useState("Patient");
   const [formData, setFormData] = useState({
     name: "",
+    dob:"",
     email: null,
     phone: null,
     type_name: "",
-    address: ""
+    address: "",
+    bloodGroup:"",
   });
   const [currentAccount, setCurrentAccount] = useState('');
   const conenctWalletHandler = async () => {
@@ -36,7 +40,7 @@ export default function Register(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (toggle === 'Patient') {
-      console.log('formData', formData)
+      // console.log('formData', formData)
       createPaitent(formData)
     } else if (toggle === 'Doctor') {
       console.log('formData', formData)
@@ -60,7 +64,11 @@ export default function Register(props) {
         )
         const { name, phone, email, type_name, address } = patient;
         const data = await TaskContract.addDoctor(name, email, Number(phone), type_name, address);
-        console.log('Doctor Signup Sucessfull', data);
+        if(data){
+          console.log('Doctor Signup Sucessfull', data);
+          navigate("/login")
+        }
+      
       } else {
         console.log("Ethereum object doesn't exist");
       }
@@ -80,9 +88,9 @@ export default function Register(props) {
           contract.abi,
           signer
         )
-        const { name, phone, email } = patient;
+        const { name, phone, email, bloodGroup, address, dob } = patient;
         let phoneNum = Number(phone);
-        const data = await TaskContract.addPatient(name, phoneNum, email);
+        const data = await TaskContract.addPatient(name, phoneNum, email, dob, bloodGroup, address);
         const transactionReceipt = await data.wait();
         if (transactionReceipt.status !== 1) {
           alert('error message');
@@ -196,6 +204,72 @@ export default function Register(props) {
                   ></input>
                 </div>
               </div>
+              {toggle === "Patient" && (
+                   <div className="lg:grid grid-cols-4 gap-2 mt-4 mr-4">
+                   <label className="font-bold lg:text-xl px-4 ">Birthdate</label>
+                   <input
+                     type="date"
+                     className=" bg-blue-100 lg:h-10 rounded pl-4 h-8"
+                     required
+     
+                     onChange={(e) => {
+                       let temppatient = { ...formData };
+                       temppatient.dob = e.target.value;
+                       setFormData(temppatient);
+                     }}
+                   ></input>
+                 </div>
+              )}
+              
+
+              {toggle === "Patient" && (
+                     <div className="grid grid-cols-4 gap-2 mt-4 mr-4">
+                     <label className="  lg:text-xl font-bold px-4">
+                       Blood Group
+                     </label>
+                     <div className="">
+                       <select
+                         className="pl-4 lg:w-1/2 bg-blue-100 lg:h-10  rounded  h-8"
+                         id="blood-group"
+                        
+                         onChange={(e) => {
+                           let temppatient = { ...formData };
+                           temppatient.bloodGroup = e.target.value;
+                           setFormData(temppatient);
+                         }}
+                       >
+                         <option id="select">select</option>
+                         <option id="A+">A+</option>
+                         <option id="A-">A-</option>
+                         <option id="B+">B+</option>
+                         <option id="B-">B-</option>
+                         <option id="AB+">AB+</option>
+                         <option id="AB-">AB-</option>
+                         <option id="O+">O+</option>
+                         <option id="O-">O-</option>
+                       </select>
+                     </div>
+                   </div>
+              )}
+            
+              <div className="aadhar lg:grid grid-cols-4 gap-2 mt-4 mr-4">
+                      <label className="font-bold lg:text-xl px-4 ">
+                        Address {" "}
+                      </label>
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Enter Your Address"
+                          required
+                          className="pl-4 bg-blue-100 lg:h-10  rounded h-8"
+                          onChange={(e) => {
+                            let temppatient = { ...formData };
+                            temppatient.address = e.target.value;
+                            setFormData(temppatient);
+                          }}
+                        ></input>
+                      </div>
+                    </div>
               {toggle === 'Doctor' &&
                 (
                   <div>
@@ -216,24 +290,7 @@ export default function Register(props) {
                         ></input>
                       </div>
                     </div>
-                    <div className="aadhar lg:grid grid-cols-4 gap-2 mt-4 mr-4">
-                      <label className="font-bold lg:text-xl px-4 ">
-                        Location {" "}
-                      </label>
-                      <div>
-                        <input
-                          type="text"
-                          placeholder="Enter Your Address"
-                          required
-                          className="pl-4 bg-blue-100 lg:h-10  rounded h-8"
-                          onChange={(e) => {
-                            let temppatient = { ...formData };
-                            temppatient.address = e.target.value;
-                            setFormData(temppatient);
-                          }}
-                        ></input>
-                      </div>
-                    </div>
+                    
                   </div>
                 )
 

@@ -9,13 +9,8 @@ import { useState } from "react";
 const DashboardSidebar = (props) => {
   const navigate = useNavigate();
   const logout = async () => {
-    const res = await fetch("/logout");
-    props.settoastCondition({
-      status: "success",
-      message: "Logged out Successfully!!!",
-    });
-    props.setToastShow(true);
-    navigate("/");
+     localStorage.removeItem("userInfo");
+     navigate("/");
   };
 
   const [Toggle, setToggle] = useState("Dashboard");
@@ -64,20 +59,7 @@ const DashboardSidebar = (props) => {
               </div>
             </div>
           </Link>
-          <Link
-            to="/register"
-            onClick={() => setToggle("Reports")}
-            className={Toggle === "Reports" ? "text-gray-900" : "text-gray-400"}
-          >
-            <div className="flex m-2 mt-6  ">
-              <div className="w-6 ml-4  ">
-                <img src={reports} alt="report"></img>
-              </div>
-              <div className="font-poppins font-bold ml-4">
-                <h1>Add Paitent</h1>
-              </div>
-            </div>
-          </Link>
+          
           <div className="p-4">
             <h1 className="font-poppins font-bold text-xl mt-4">Main menu</h1>
             <div className="grid grid-rows-2 gap-4 font-bold font-poppins mt-4">

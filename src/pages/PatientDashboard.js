@@ -1,7 +1,5 @@
 import patient_profile from "../assets/img/dashboard/patient2_pbl.png";
-
 import reports from "../assets/img/dashboard/report2_pbl.png";
-
 import search from "../assets/img/dashboard/search2.png";
 import Footer from "../components/landingPage/Footer";
 import eye from "../assets/img/dashboard/eye.png";
@@ -10,8 +8,38 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/landingPage/Navbar";
 import data from "../data.json"
 import PatientHistoryCompo from "../components/patientDashboard/PatientHistoryCompo";
-
+import { ethers } from "ethers";
+import contract from "../abis/HealthCare.json"
 const PatientDashboard = ({user}) => {
+  
+  const [patientData, setPatientData] = useState(null);
+
+  const getProfile = async () => {
+		try {
+			const { ethereum } = window
+
+			if (ethereum) {
+				const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+				const TaskContract = new ethers.Contract(
+					contract.networks[5777].address,
+					contract.abi,
+					signer
+				)
+				const userInfo = await TaskContract.getPatientProfile();
+				console.log('userInfo paitent', userInfo)
+        setPatientData(userInfo);
+			} else {
+				console.log("Ethereum object doesn't exist");
+			}
+		} catch (error) {
+			console.log("Login error", error.message);
+		}
+	}
+	useEffect(() => {
+		getProfile()
+	}, [])
+
   return (
     <>
     <div className="full-body col-span-10 h-screen">
@@ -43,7 +71,7 @@ const PatientDashboard = ({user}) => {
                     alt="profile"
                   ></img>
                   <div className="mt-4 ml-4  font-bold font-poppins">
-                    <h1>{user[1]}</h1>
+                    <h1>{patientData?.name}</h1>
                   </div>
                 </button>
               </Link>
@@ -63,7 +91,7 @@ const PatientDashboard = ({user}) => {
                     <h1>Name : </h1>
                   </div>
                   <div className="flex ml-2   ">
-                    <h1 className="pl-1">{user[1]}</h1>
+                    <h1 className="pl-1">{patientData?.name}</h1>
                    
                   </div>
                 </div>
@@ -72,7 +100,7 @@ const PatientDashboard = ({user}) => {
                     <h1>Email : </h1>
                   </div>
                   <div className="flex ml-2   ">
-                    <h1 className="pl-1">{user[2]}</h1>
+                    <h1 className="pl-1">{patientData?.email}</h1>
                    
                   </div>
                 </div>
@@ -89,7 +117,7 @@ const PatientDashboard = ({user}) => {
                     <h1>Blood group : </h1>
                   </div>
                   <div className="ml-2">
-                    <h1>B+</h1>
+                    <h1>{patientData?.bloodGroup}</h1>
                   </div>
                 </div>
               </div>
