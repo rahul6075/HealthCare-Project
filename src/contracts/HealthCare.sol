@@ -3,19 +3,7 @@ pragma solidity >=0.4.25 <0.9.0;
 
 contract HealthCare {
     address private owner;
-
-    // enum Level {
-    //     High,
-    //     Healthy,
-    //     Low
-    // }
-
-    // enum Role {
-    //     Owner,
-    //     Admin,
-    //     Doctor,
-    //     Patient
-    // }
+    uint private reportCount;
 
     struct Hospital {
         address id;
@@ -34,6 +22,7 @@ contract HealthCare {
         string type_name;
         string location;
         address hospital;
+        address[] patient_list;
     }
 
     struct Patient {
@@ -44,6 +33,7 @@ contract HealthCare {
         string dob;
         string bloodGroup;
         string permanentAddress;
+        address[] doctor_list;
         // uint score;
         // Analysis[] history;
     }
@@ -67,36 +57,145 @@ contract HealthCare {
     mapping(address => Patient) private patients;
     mapping(address => Analysis[]) reports;
 
+    mapping(address => mapping(address => uint256)) private doctorToPatient; // doctors to patient list
+    mapping(address => mapping(address => uint256)) private patientToDoctor;
+
     constructor() {
         owner = msg.sender;
+        reportCount = 0;
     }
 
-    modifier checkDoctor() {
-        Doctor memory d = doctors[msg.sender];
-        require(d.id > address(0x0), "Access Denied");
+    modifier checkDoctor(address id) {
+        Doctor memory d = doctors[id];
+        require(d.id > address(0x0), "Doctor Not Found or Access Denied");
         _;
     }
 
-    modifier checkPatient() {
-        Patient storage p = patients[msg.sender];
-        require(p.id > address(0x0), "Access Denied");
+    modifier checkPatient(address id) {
+        Patient storage p = patients[id];
+        require(p.id > address(0x0), "Patient Not Found or Access Denied");
         _;
     }
 
-    modifier checkAdmin() {
-        Hospital storage h = hospitals[msg.sender];
-        require(h.id > address(0x0), "Access Denied");
+    modifier checkHospital(address id) {
+        Hospital storage h = hospitals[id];
+        require(h.id > address(0x0), "Hospital Not Found or Access Denied");
         _;
     }
 
-    modifier checkDoctorOrHospital() {
+    modifier checkDoctorOrHospital(address id) {
         Hospital memory h = hospitals[msg.sender];
         Doctor memory d = doctors[msg.sender];
-        require(h.id > address(0x0) || d.id > address(0x0), "Access Denied");
+        require(
+            h.id > address(0x0) || d.id > address(0x0),
+            "User not found or Access Denied"
+        );
         _;
     }
 
     event Signup(address add, string name, string role);
+
+    // -------------------------------------------------------------------------------
+    //  Patient
+    // -------------------------------------------------------------------------------
+
+    function addPatient(
+        string memory _name,
+        uint _phone,
+        string memory _email,
+        string memory _dob,
+        string memory _bloodGroup,
+        string memory _permanentAddress
+    ) public {
+        Patient storage p = patients[msg.sender];
+        require(keccak256(abi.encodePacked(_name)) != keccak256(""), "");
+        require(!(p.id > address(0x0)), "Account already present");
+        patients[msg.sender] = Patient({
+            id: msg.sender,
+            name: _name,
+            phone: _phone,
+            email: _email,
+            dob: _dob,
+            bloodGroup: _bloodGroup,
+            permanentAddress: _permanentAddress,
+            doctor_list: new address[](0)
+        });
+        emit Signup(msg.sender, _name, "Patient");
+    }
+
+    function getPatientInfo(
+        address pAddress
+    )
+        public
+        view
+        checkDoctorOrHospital(msg.sender)
+        checkPatient(pAddress)
+        returns (
+            string memory name,
+            string memory email,
+            uint phone,
+            Analysis[] memory results,
+            address[] memory doctor_list
+        )
+    {
+        Patient memory p = patients[pAddress];
+        return (p.name, p.email, p.phone, reports[msg.sender], p.doctor_list);
+    }
+
+    function getPatientProfile()
+        public
+        view
+        checkPatient(msg.sender)
+        returns (
+            string memory name,
+            string memory email,
+            string memory dob,
+            string memory bloodGroup,
+            string memory permanentAddress,
+            Analysis[] memory history
+        )
+    {
+        Patient memory p = patients[msg.sender];
+        return (
+            p.name,
+            p.email,
+            p.dob,
+            p.bloodGroup,
+            p.permanentAddress,
+            reports[msg.sender]
+        );
+    }
+
+    function grantAccessToDoctor(
+        address doctor_id
+    ) public checkPatient(msg.sender) checkDoctor(doctor_id) {
+        Patient storage p = patients[msg.sender];
+        Doctor storage d = doctors[doctor_id];
+        require(
+            patientToDoctor[msg.sender][doctor_id] < 1,
+            "This Doctor is already assigned"
+        );
+
+        p.doctor_list.push(doctor_id);
+        patientToDoctor[msg.sender][doctor_id]++;
+        doctorToPatient[doctor_id][msg.sender]++;
+        d.patient_list.push(msg.sender);
+    }
+
+    function removeAccessFromDoctor(
+        address doctor_id
+    ) public checkPatient(msg.sender) checkDoctor(doctor_id) {
+        require(
+            patientToDoctor[msg.sender][doctor_id] > 0,
+            "This Doctor is not assigned"
+        );
+        patientToDoctor[msg.sender][doctor_id] = 0;
+        doctorToPatient[doctor_id][msg.sender] = 0;
+    }
+
+    // -------------------------------------------------------------------------------
+    //  Doctor
+    // -------------------------------------------------------------------------------
 
     function addDoctor(
         string memory _name,
@@ -115,33 +214,52 @@ contract HealthCare {
             phone: phone,
             type_name: _type_name,
             location: _location,
-            hospital: address(0x0)
+            hospital: address(0x0),
+            patient_list: new address[](0)
         });
         emit Signup(msg.sender, _name, "Doctor");
     }
 
-    function addPatient(
-        string memory _name,
-        uint _phone,
-        string memory _email,
-        string memory _dob,
-        string memory _bloodGroup,
-        string memory _permanentAddress
-    ) public {
-        Patient storage p = patients[msg.sender];
-        require(keccak256(abi.encodePacked(_name)) != keccak256(""), "");
-        require(!(p.id > address(0x0)), "Account already present");
-        patients[msg.sender] = Patient(
-            msg.sender,
-            _name,
-            _phone,
-            _email,
-            _dob,
-            _bloodGroup,
-            _permanentAddress
+    function addAnalysis(
+        address pat,
+        string memory testName,
+        address hospital,
+        uint price,
+        string memory date,
+        uint value,
+        uint min,
+        uint max,
+        uint weight
+    ) public checkDoctor(msg.sender) {
+        Doctor memory d = doctors[msg.sender];
+        require(d.hospital == hospital, "Invalid Hospital");
+        require(
+            patientToDoctor[pat][msg.sender] > 0,
+            "Doctor is not assigned to Patient"
         );
-        emit Signup(msg.sender, _name, "Patient");
+        address[] memory sign = new address[](1);
+        sign[0] = msg.sender;
+        reports[pat].push(
+            Analysis({
+                ID: reportCount,
+                testName: testName,
+                hospital: hospital,
+                doctor: msg.sender,
+                price: price,
+                date: date,
+                value: value,
+                min: min,
+                max: max,
+                weight: weight,
+                signatures: sign
+            })
+        );
+        reportCount++;
     }
+
+    // -------------------------------------------------------------------------------
+    //  Hospital
+    // -------------------------------------------------------------------------------
 
     function addHospital(
         string memory name,
@@ -164,6 +282,16 @@ contract HealthCare {
         emit Signup(msg.sender, name, "Hospital");
     }
 
+    function assignHostpitalToDoctor(
+        address doc
+    ) public checkHospital(msg.sender) checkDoctor(doc) {
+        doctors[doc].hospital = msg.sender;
+    }
+
+    // -------------------------------------------------------------------------------
+    //  Public functions
+    // -------------------------------------------------------------------------------
+
     function Login()
         public
         view
@@ -184,25 +312,7 @@ contract HealthCare {
         } else if (d.id > (address(0x0))) {
             return (msg.sender, d.name, d.email, "Doctor");
         }
-        return (address(0x0), "", "", "unknown");
-    }
-
-    function getPatientInfo(
-        address pAddress
-    )
-        public
-        view
-        checkDoctorOrHospital
-        returns (
-            string memory name,
-            string memory email,
-            uint phone,
-            Analysis[] memory
-        )
-    {
-        Patient memory p = patients[pAddress];
-        require((p.id > address(0x0)), "Patient Not Found");
-        return (p.name, p.email, p.phone, reports[msg.sender]);
+        revert("NO Account found");
     }
 
     function getDoctorInfo(
@@ -210,6 +320,7 @@ contract HealthCare {
     )
         public
         view
+        checkDoctor(dAddress)
         returns (
             string memory name,
             string memory email,
@@ -218,32 +329,7 @@ contract HealthCare {
         )
     {
         Doctor memory d = doctors[dAddress];
-        require((d.id > address(0x0)), "Doctor Not Found");
         return (d.name, d.email, d.phone, d.hospital);
-    }
-
-    function getPatientProfile()
-        public
-        view
-        returns (
-            string memory name,
-            string memory email,
-            string memory dob,
-            string memory bloodGroup,
-            string memory permanentAddress,
-            Analysis[] memory
-        )
-    {
-        Patient memory p = patients[msg.sender];
-        require((p.id > address(0x0)), "Doctor Not Found");
-        return (
-            p.name,
-            p.email,
-            p.dob,
-            p.bloodGroup,
-            p.permanentAddress,
-            reports[msg.sender]
-        );
     }
 }
 
