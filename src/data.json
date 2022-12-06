@@ -3,34 +3,34 @@
         {
             "id":1,
             "date":"10/10/2021",
-            "docter_name": "Mr. Rakesh Jhaa",
+            "docter_name": "Rakesh Jhaa",
             "daignosis": "Fever",
             "presc": "Lorem ispusm some thinf"
         },
         {
             "id":2,
-            "date":"10/10/2021",
-            "docter_name": "Mr. Rakesh Jhaa",
-            "daignosis": "Fever",
+            "date":"10/10/2020",
+            "docter_name": "Rakesh Jhaa",
+            "daignosis": "Cancer",
             "presc": "Lorem ispusm some thinf"
         },
         {
             "id":3,
-            "date":"10/10/2021",
-            "docter_name": "Mr. Rakesh Jhaa",
-            "daignosis": "Fever",
+            "date":"10/8/2019",
+            "docter_name": "Rakesh Jhaa",
+            "daignosis": "Maleria",
             "presc": "Lorem ispusm some thinf"
         },
         {
             "id":4,
             "date":"10/10/2021",
-            "docter_name": "Mr. Rakesh Jhaa",
-            "daignosis": "Fever",
+            "docter_name": "Rakesh Jhaa",
+            "daignosis": "Lung Cancer",
             "presc": "Lorem ispusm some thinf"
         },
         {
             "date":"10/10/2021",
-            "docter_name": "Mr. Rakesh Jhaa",
+            "docter_name": "Rakesh Jhaa",
             "daignosis": "Fever",
             "presc": "Lorem ispusm some thinf"
         }

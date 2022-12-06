@@ -9,6 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "../components/landingPage/Navbar";
 import data from "../data.json"
+import PatientHistoryCompo from "../components/patientDashboard/PatientHistoryCompo";
 
 const PatientDashboard = ({user}) => {
   return (
@@ -178,13 +179,19 @@ const PatientDashboard = ({user}) => {
                   <hr></hr>
                   <hr></hr>
                 </div>
-                   {
-                    //  data?.patient-record.map((item) => {
-                        
-                    //  })
-                   }
-                  <div className="mx-auto mt-3 mb-5">No Records Found...</div>
-              </div>
+                {data.record.length > 0 ? (
+                  data.record.map((prescription) => {
+                    return (
+                      <PatientHistoryCompo
+                        prescription={prescription}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="font-bold mt-3 mx-auto">
+                    No Record Found...
+                  </div>
+                )}  </div>
             </div>
           </div>
         </div>

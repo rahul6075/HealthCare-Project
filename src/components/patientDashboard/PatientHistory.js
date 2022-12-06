@@ -3,8 +3,9 @@ import patient_profile from "../../assets/img/dashboard/patient2_pbl.png";
 import PatientHistoryCompo from "./PatientHistoryCompo";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-const PatientHistory = (props) => {
+import data from "../../data.json";
+const PatientHistory = () => {
+ 
   
   return (
     <div className="col-span-10">
@@ -52,9 +53,20 @@ const PatientHistory = (props) => {
                   <hr></hr>
                   <hr></hr>
                 </div>
-                <div className="font-bold mt-3 mx-auto">
+
+                {data.record.length > 0 ? (
+                  data.record.map((prescription) => {
+                    return (
+                      <PatientHistoryCompo
+                        prescription={prescription}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="font-bold mt-3 mx-auto">
                     No Record Found...
                   </div>
+                )}
               </div>
             </div>
           </div>
