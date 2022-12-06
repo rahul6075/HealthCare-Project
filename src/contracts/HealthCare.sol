@@ -41,6 +41,9 @@ contract HealthCare {
         string name;
         uint phone;
         string email;
+        string dob;
+        string bloodGroup;
+        string permanentAddress;
         // uint score;
         // Analysis[] history;
     }
@@ -56,8 +59,7 @@ contract HealthCare {
         uint256 min;
         uint256 max;
         uint256 weight;
-        uint256 signatureCount;
-        mapping(address => uint256) signatures;
+        address[] signatures;
     }
 
     mapping(address => Hospital) private hospitals;
@@ -121,12 +123,23 @@ contract HealthCare {
     function addPatient(
         string memory _name,
         uint _phone,
-        string memory _email
+        string memory _email,
+        string memory _dob,
+        string memory _bloodGroup,
+        string memory _permanentAddress
     ) public {
         Patient storage p = patients[msg.sender];
         require(keccak256(abi.encodePacked(_name)) != keccak256(""), "");
         require(!(p.id > address(0x0)), "Account already present");
-        patients[msg.sender] = Patient(msg.sender, _name, _phone, _email);
+        patients[msg.sender] = Patient(
+            msg.sender,
+            _name,
+            _phone,
+            _email,
+            _dob,
+            _bloodGroup,
+            _permanentAddress
+        );
         emit Signup(msg.sender, _name, "Patient");
     }
 
@@ -154,19 +167,24 @@ contract HealthCare {
     function Login()
         public
         view
-        returns (address id, string memory name, string memory email)
+        returns (
+            address id,
+            string memory name,
+            string memory email,
+            string memory role
+        )
     {
         Patient memory p = patients[msg.sender];
         Hospital memory h = hospitals[msg.sender];
         Doctor memory d = doctors[msg.sender];
         if (p.id > address(0x0)) {
-            return (msg.sender, p.name, p.email);
+            return (msg.sender, p.name, p.email, "Patient");
         } else if (h.id > address(0x0)) {
-            return (msg.sender, h.name, h.email);
+            return (msg.sender, h.name, h.email, "Hospital");
         } else if (d.id > (address(0x0))) {
-            return (msg.sender, d.name, d.email);
+            return (msg.sender, d.name, d.email, "Doctor");
         }
-        return (address(0x0), "", "");
+        return (address(0x0), "", "", "unknown");
     }
 
     function getPatientInfo(
@@ -175,14 +193,19 @@ contract HealthCare {
         public
         view
         checkDoctorOrHospital
-        returns (string memory name, string memory email, uint phone)
+        returns (
+            string memory name,
+            string memory email,
+            uint phone,
+            Analysis[] memory
+        )
     {
         Patient memory p = patients[pAddress];
         require((p.id > address(0x0)), "Patient Not Found");
-        return (p.name, p.email, p.phone);
+        return (p.name, p.email, p.phone, reports[msg.sender]);
     }
 
-    function getDoctorProfile(
+    function getDoctorInfo(
         address dAddress
     )
         public
@@ -197,6 +220,30 @@ contract HealthCare {
         Doctor memory d = doctors[dAddress];
         require((d.id > address(0x0)), "Doctor Not Found");
         return (d.name, d.email, d.phone, d.hospital);
+    }
+
+    function getPatientProfile()
+        public
+        view
+        returns (
+            string memory name,
+            string memory email,
+            string memory dob,
+            string memory bloodGroup,
+            string memory permanentAddress,
+            Analysis[] memory
+        )
+    {
+        Patient memory p = patients[msg.sender];
+        require((p.id > address(0x0)), "Doctor Not Found");
+        return (
+            p.name,
+            p.email,
+            p.dob,
+            p.bloodGroup,
+            p.permanentAddress,
+            reports[msg.sender]
+        );
     }
 }
 
