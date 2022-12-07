@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
 import logo from "../../assets/img/landingPage/logo.png";
 import dashboard from "../../assets/img/dashboard/dashboard.jpeg";
 import reports from "../../assets/img/dashboard/report2_pbl.png";
@@ -5,16 +7,18 @@ import patient_history from "../../assets/img/dashboard/patient_history.jpeg";
 import patient_profile from "../../assets/img/dashboard/patient2_pbl.png";
 import logoutimg from "../../assets/img/dashboard/logout.png";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
+
 const DashboardSidebar = (props) => {
   const navigate = useNavigate();
   const logout = async () => {
-     localStorage.removeItem("userInfo");
-     navigate("/");
+    localStorage.removeItem("userInfo");
+    toast.success("User Logout Successfully");
+    navigate("/");
   };
 
   const [Toggle, setToggle] = useState("Dashboard");
   return (
+    <>
     <div className="h-screen overflow-y-hidden w-screen grid grid-cols-12">
       <div className="side_bar bg-white shadow col-span-2">
         <div className="flex m-2 mt-4  ">
@@ -111,6 +115,8 @@ const DashboardSidebar = (props) => {
       </div>
       <Outlet />
     </div>
+    <ToastContainer/>
+    </>
   );
 };
 

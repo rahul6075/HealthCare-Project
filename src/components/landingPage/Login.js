@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import profile from "../../assets/img/landingPage/profile.png";
 import { ethers } from "ethers";
 import contract from "../../abis/HealthCare.json"
-
-const addressContract = '0xE6773e3D8C979B4CaCAd2510759655Be5b076630'
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login(props) {
 	const navigate = useNavigate();
@@ -46,9 +46,11 @@ export default function Login(props) {
 					signer
 				)
 				const userInfo = await TaskContract.Login();
-				setRole(userInfo.role);
+				setRole(userInfo.role)
 				console.log('userInfo', userInfo.role);
 				if (userInfo) {
+					// toast.success("User Successfully Registered.");
+					localStorage.setItem("account", currentAccount);
 					localStorage.setItem("userInfo", JSON.stringify(userInfo));
 					switch (role) {
 						case "Patient":
@@ -66,10 +68,10 @@ export default function Login(props) {
 				}
 
 			} else {
-				console.log("Ethereum object doesn't exist");
+				toast.warn("Ethereum object doesn't exist");
 			}
 		} catch (error) {
-			console.log("Login error", error.message);
+			toast.error(error.message)
 		}
 	}
 	useEffect(() => {
@@ -77,6 +79,7 @@ export default function Login(props) {
 	}, [])
 
 	return (
+		<>
 		<div className="bg-white flex flex-col justify-items-center items-center py-4 px-4 rounded shadow-md lg:w-3/4 w-full my-7 ml-auto ">
 			<h1 className="text-3xl font-bold font-poppins text-primary py-5">
 				Login
@@ -137,6 +140,9 @@ export default function Login(props) {
 			<h1 className="font-poppins text-base pt-5">
 				New User, <Link to="/Register">Register here</Link>
 			</h1>
+			
 		</div>
+		<ToastContainer/>
+		</>
 	);
 }

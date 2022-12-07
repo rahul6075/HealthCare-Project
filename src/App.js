@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import { useNavigate } from "react-router-dom";
 import './App.css';
 import Contact from './components/landingPage/Contact';
 import RegisterPatient from './components/landingPage/RegisterPatient';
@@ -25,28 +26,18 @@ import PatientHistoryDoctorView from './components/doctorDashboard/PatientHistor
 import PreviewPrescriptionDoctorView from './components/doctorDashboard/PreviewPrescriptionDoctorView';
 import 'react-toastify/dist/ReactToastify.css';
 import Page_404 from './pages/Page_404';
-import PaitentSignup from './components/landingPage/PaitentSignup';
+
 
 function App() {
-  const data =  JSON.parse(localStorage.getItem('userInfo'));
-  const [user, setUser] = useState(data);
-
-  useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('userInfo'));
-    if (items) {
-      console.log('items', items);
-     setUser(items);
-    }
-  },[]);
   return (
     <div className='bg-bgprimary flex'>
       <Routes>
-        <Route path='/' element={<LandingPage user = {user} />} />
+        <Route path='/' element={<LandingPage/>} />
         <Route path='about' element={<About />} />
         <Route path='contact' element={<Contact />} />
         <Route path='Register' element={<RegisterPatient />} />
         <Route path='patient' element={<PatientProfileSideBar />}>
-          <Route path='dashboard' element={<PatientDashboard user ={user} />} />
+          <Route path='dashboard' element={<PatientDashboard />} />
           <Route path='reports' element={<PatientReports />} />
           <Route path='history' element={<PatientHistory />} />
           <Route path='profile' element={<PatientProfile />} />
@@ -54,7 +45,7 @@ function App() {
         </Route>
 
         <Route path='doctor' element={<DoctorDashboardSidebar />}>
-          <Route path='dashboard' element={<DoctorDashboard user = {user} />} />
+          <Route path='dashboard' element={<DoctorDashboard  />} />
           <Route path='reports' element={<PatientReportsDoctorView />} />
 
           <Route path='history' element={<PatientHistoryDoctorView />} />

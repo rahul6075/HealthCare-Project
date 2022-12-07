@@ -78,7 +78,7 @@ const DoctorDashboard = ({user}) => {
                   <div className="grid grid-rows-2 ml-4 gap-2  mb-4">
                     <div className="font-bold font-poppins text-base">
                       <h1 className="">
-                       {doctorData?.name}
+                       Dr. Rakesh Jhaa
                       </h1>
                     </div>
                     <div className="">

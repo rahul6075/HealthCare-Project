@@ -4,7 +4,8 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { ethers } from "ethers";
 import contract from "../../abis/HealthCare.json"
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function Register(props) {
   const navigate = useNavigate();
   const [toggle, setToggle] = useState("Patient");
@@ -65,15 +66,15 @@ export default function Register(props) {
         const { name, phone, email, type_name, address } = patient;
         const data = await TaskContract.addDoctor(name, email, Number(phone), type_name, address);
         if(data){
-          console.log('Doctor Signup Sucessfull', data);
-          navigate("/login")
+          toast.success("Doctor Successfully Registered.");
+          navigate("/doctor/dashboard")
         }
       
       } else {
-        console.log("Ethereum object doesn't exist");
+        toast.warn("Ethereum object doesn't exist");
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   }
   const createPaitent = async (patient) => {
@@ -96,11 +97,17 @@ export default function Register(props) {
           alert('error message');
           return;
         }
+        if(data){
+          toast.success("Patient Successfully Registered.");
+          navigate("/patient/dashboard")
+        }
       } else {
-        console.log("Ethereum object doesn't exist");
+        toast.warn("Ethereum object doesn't exist");
+        // console.log("Ethereum object doesn't exist");
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message)
+      // console.log(error);
     }
   }
 
@@ -313,6 +320,7 @@ export default function Register(props) {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
